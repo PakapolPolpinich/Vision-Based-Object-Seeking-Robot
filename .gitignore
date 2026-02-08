@@ -1,0 +1,11 @@
+# YOLO vision dataset (correct path)
+train/vision/train/
+train/vision/valid/
+train/vision/test/
+
+# Dataset config & notes
+train/vision/data.yaml
+train/vision/README.dataset.txt
+train/vision/README.roboflow.txt
+
+data/
