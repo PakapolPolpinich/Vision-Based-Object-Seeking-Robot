@@ -20,7 +20,7 @@ model_object = YOLO(model_path)
 
 cap = cv2.VideoCapture(0)
 
-
+Width_Real = [5.8,0,0,0] # cm
 
 while True:
     check_cap_sucess, frame = cap.read()
