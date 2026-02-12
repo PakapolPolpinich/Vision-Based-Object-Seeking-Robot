@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import cv2
 import os
+from spi_to_stm32 import SPIProtocol
 
 # path model
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -42,6 +43,24 @@ trigger_predict = False      # run predict only when user presses a key
 
 Set_robot_middle = 0
 
+# ====== TUNING ======
+TOL = 20          #  (px)
+ALPHA = 0.2       # exponential smoothing (0.15-0.30)
+JUMP_TH = 80      # outlier threshold (60-150)
+MAX_STEP = 20     # rate limit per frame (10-30)
+
+
+# ====== STATE (???????? global/??? loop) ======
+dx_f = 0.0
+dy_f = 0.0
+dx_cmd = 0.0
+dy_cmd = 0.0
+filter_inited = False
+center_count = 0
+dx_prev = 0
+dy_prev = 0
+dxdy_inited = False
+
 def find_robot_middle(frame_camera,x1_oj, y1_oj, x2_oj, y2_oj):
     height, width = frame_camera.shape[:2]
     center_x = width // 2
@@ -52,7 +71,8 @@ def find_robot_middle(frame_camera,x1_oj, y1_oj, x2_oj, y2_oj):
     dy = object_center_y - center_y
     return dx,dy
 
-TOL = 5
+TOL = 10
+spi = SPIProtocol()
 
 while True:
     check_cap_sucess, frame = cap.read()
@@ -66,7 +86,7 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
         if trigger_predict == True and target_class is not None:
-            results = model_object.predict(frame, conf=0.4, verbose=False) #return list of results
+            results = model_object.predict(frame, conf=0.7, verbose=False) #return list of results
             # get boxes classes
             boxes = results[0].boxes
             matched = []
@@ -81,12 +101,33 @@ while True:
                         #find a distance
                         width_Camera_object = y2 - y1
                         distance = (Width_real[name] * Focus_real) / width_Camera_object
-                        #move robot to center object
+                        #move robot to center objectSSS
+                       
                         dx, dy = find_robot_middle(frame, x1, y1, x2, y2)
+                        
+                        if not dxdy_inited:
+                            dx_prev, dy_prev = dx, dy
+                            dxdy_inited = True
+                        else:
+                            if abs(dx - dx_prev) > 40:
+                                dx = dx_prev
+                            if abs(dy - dy_prev) > 40:
+                                dy = dy_prev
+
+                            dx_prev, dy_prev = dx, dy
+
+
                         centered = (abs(dx) <= TOL)
                         ##################################
 
-                        #code move robot to center object
+                        # #code move robot to center object
+                        # if centered == False:
+                        #     if dx > 0:
+                        #         spi.send(b"r")
+                        #     elif dx < 0:
+                        #         spi.send(b"l")
+                        # else :
+                        #     spi.send(b"s")
 
                         ##################################
                         cv2.putText(frame, f"error dx,dy = ({dx},{dy})", (10, 70),
@@ -95,7 +136,7 @@ while True:
                         if centered == True:
                             cv2.putText(frame, "Centered!", (10, 90),
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-
+                        print(dx)
             #else motorcontrol to find a match            
 
             # draw best match (highest confidence)
@@ -122,6 +163,7 @@ while True:
 
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
+        spi.send(b"s")
         break
 
     # press b/t/m/d -> set target class and trigger predict
