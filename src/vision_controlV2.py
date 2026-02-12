@@ -74,6 +74,9 @@ def find_robot_middle(frame_camera,x1_oj, y1_oj, x2_oj, y2_oj):
 TOL = 10
 spi = SPIProtocol()
 
+found_object = False
+object_firsttime = True
+
 while True:
     check_cap_sucess, frame = cap.read()
     #check status camera
@@ -91,10 +94,16 @@ while True:
             boxes = results[0].boxes
             matched = []
             if boxes is not None and len(boxes) > 0:
+              
                 for i in range(len(boxes)):
                     cls_id = int(boxes.cls[i].item())
                     name = model_object.names[cls_id]
                     if name == target_class:
+                        found_object = True
+                        if object_firsttime == True:
+                             spi.send(b"s")
+                             object_firsttime = False
+
                         x1, y1, x2, y2 = boxes.xyxy[i].cpu().numpy()
                         conf = float(boxes.conf[i].item()) if boxes.conf is not None else 0.0
                         matched.append((conf, (x1, y1, x2, y2)))
@@ -136,9 +145,12 @@ while True:
                         if centered == True:
                             cv2.putText(frame, "Centered!", (10, 90),
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-                        print(dx)
+                        # print(dx)
             #else motorcontrol to find a match            
-
+            if found_object == False: #check first time
+                spi.send(b"c") #clockwise
+                print("hello")
+            #print(found_object)
             # draw best match (highest confidence)
             if len(matched) > 0:
                 matched.sort(key=lambda x: x[0], reverse=True)
@@ -170,6 +182,8 @@ while True:
     if key in key_to_class:
         target_class = key_to_class[key]
         trigger_predict = True
+        found_object = False
+        object_firsttime = True
 
 cap.release()
 cv2.destroyAllWindows()
