@@ -14,13 +14,13 @@ model_path = os.path.join(
     "Result",
     "weights",
     "best.pt"
-)
+    )
 
 model_object = YOLO(model_path)
 
 cap = cv2.VideoCapture(0)
 
-Width_Real = [5.8,0,0,0] # cm
+
 
 while True:
     check_cap_sucess, frame = cap.read()
@@ -59,7 +59,7 @@ while True:
                 f = 512.5  #focal length
                 d = (W * f) / w
                 # cv2.putText(
-                #     annotated, f"f: {f:.2f} pixel", (x1, y2 + 20),
+                #     annotated, f"f: {f:.2f} pixel", (x1, y2 + 20), 
                 #     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
                 # )
                 cv2.putText(

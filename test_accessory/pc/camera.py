@@ -30,7 +30,7 @@ while True:
     # push c -> capture
     if key == ord('c'):
        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%s")
-        filename = f"two_object_{count}.jpg"
+        filename = f"ver2_bicycle_{count}.jpg"
         filepath = os.path.join(save_dir, filename)
         cv2.imwrite(filepath, frame) #save image
         print(f"Saved: {filepath}")
