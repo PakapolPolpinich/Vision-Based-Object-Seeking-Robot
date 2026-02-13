@@ -71,14 +71,17 @@ def find_robot_middle(frame_camera,x1_oj, y1_oj, x2_oj, y2_oj):
     dy = object_center_y - center_y
     return dx,dy
 
-TOL = 10
+TOL = 20
 spi = SPIProtocol()
 
 found_object = False
 object_firsttime = True
+centered_found_F = False
+count_center = 0
 
 while True:
     check_cap_sucess, frame = cap.read()
+
     #check status camera
     if check_cap_sucess == True:
         if target_class is not None:
@@ -89,7 +92,7 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
         if trigger_predict == True and target_class is not None:
-            results = model_object.predict(frame, conf=0.7, verbose=False) #return list of results
+            results = model_object.predict(frame,imgsz = 512 ,conf=0.7, verbose=False) #return list of results
             # get boxes classes
             boxes = results[0].boxes
             matched = []
@@ -114,29 +117,31 @@ while True:
                        
                         dx, dy = find_robot_middle(frame, x1, y1, x2, y2)
                         
-                        if not dxdy_inited:
-                            dx_prev, dy_prev = dx, dy
-                            dxdy_inited = True
-                        else:
-                            if abs(dx - dx_prev) > 40:
-                                dx = dx_prev
-                            if abs(dy - dy_prev) > 40:
-                                dy = dy_prev
+                        # if not dxdy_inited:
+                        #     dx_prev, dy_prev = dx, dy
+                        #     dxdy_inited = True
+                        # else:
+                        #     if abs(dx - dx_prev) > 40:
+                        #         dx = dx_prev
+                        #     if abs(dy - dy_prev) > 40:
+                        #         dy = dy_prev
 
-                            dx_prev, dy_prev = dx, dy
+                        #     dx_prev, dy_prev = dx, dy
 
 
                         centered = (abs(dx) <= TOL)
                         ##################################
-
+                        
                         # #code move robot to center object
-                        # if centered == False:
-                        #     if dx > 0:
-                        #         spi.send(b"r")
-                        #     elif dx < 0:
-                        #         spi.send(b"l")
-                        # else :
-                        #     spi.send(b"s")
+                        if centered == False and count_center < 2:
+                            if dx > 0:
+                                spi.send(b"r")
+                            elif dx < 0:
+                                spi.send(b"l")
+                        else :
+                            spi.send(b"s")
+                            count_center += 1
+                            #centered_found_F = True
 
                         ##################################
                         cv2.putText(frame, f"error dx,dy = ({dx},{dy})", (10, 70),
@@ -149,7 +154,7 @@ while True:
             #else motorcontrol to find a match            
             if found_object == False: #check first time
                 spi.send(b"c") #clockwise
-                print("hello")
+             
             #print(found_object)
             # draw best match (highest confidence)
             if len(matched) > 0:
@@ -184,6 +189,7 @@ while True:
         trigger_predict = True
         found_object = False
         object_firsttime = True
+        count_center = 0
 
 cap.release()
 cv2.destroyAllWindows()
