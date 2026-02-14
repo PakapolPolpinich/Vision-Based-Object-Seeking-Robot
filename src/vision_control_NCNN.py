@@ -2,6 +2,7 @@ from ultralytics import YOLO
 import cv2
 import os
 from spi_to_stm32 import SPIProtocol
+import time
 
 # path model
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -71,7 +72,19 @@ def find_robot_middle(frame_camera,x1_oj, y1_oj, x2_oj, y2_oj):
     dy = object_center_y - center_y
     return dx,dy
 
-TOL = 20
+
+# RATE_R = 640.0   # px/s (หมุนขวา) จาก log ของคุณ ~638.6
+# RATE_L = 540.0   # px/s (หมุนซ้าย) จาก log ของคุณ ~537.5
+
+RATE_R = 900.0   # px/s (หมุนขวา) จาก log ของคุณ ~638.6
+RATE_L = 900.0
+
+MIN_DT = 0.01    # 10ms
+MAX_DT = 0.06    # 60ms
+#TOL = 50         # px (คุณใช้อยู่)
+
+
+TOL = 30
 spi = SPIProtocol()
 
 found_object = False
@@ -113,35 +126,34 @@ while True:
                         #find a distance
                         width_Camera_object = y2 - y1
                         distance = (Width_real[name] * Focus_real) / width_Camera_object
-                        #move robot to center objectSSS
+                        #move robot to center objectSSSt
                        
                         dx, dy = find_robot_middle(frame, x1, y1, x2, y2)
-                        
-                        # if not dxdy_inited:
-                        #     dx_prev, dy_prev = dx, dy
-                        #     dxdy_inited = True
-                        # else:
-                        #     if abs(dx - dx_prev) > 40:
-                        #         dx = dx_prev
-                        #     if abs(dy - dy_prev) > 40:
-                        #         dy = dy_prev
-
-                        #     dx_prev, dy_prev = dx, dy
-
 
                         centered = (abs(dx) <= TOL)
                         ##################################
-                        
-                        # #code move robot to center object
-                        if centered == False and count_center < 2:
-                            if dx > 0:
-                                spi.send(b"r")
-                            elif dx < 0:
-                                spi.send(b"l")
-                        else :
+                        if abs(dx) <= TOL:
                             spi.send(b"s")
-                            count_center += 1
-                            #centered_found_F = True
+                        else:
+                        
+                            dx1 = dx
+
+                            if dx > 0:
+                                direction = b"r"
+                                rate = RATE_R
+                            else:
+                                direction = b"l"
+                                rate = RATE_L
+
+                            # 3) cal movement dx/rate ( clamp)
+                            dt = abs(dx) / rate
+                            dt = max(MIN_DT, min(dt, MAX_DT))
+
+                            # 4) send → delay → stop
+                            spi.send(direction)
+                            time.sleep(float(dt))
+                            spi.send(b"s")
+
 
                         ##################################
                         cv2.putText(frame, f"error dx,dy = ({dx},{dy})", (10, 70),
@@ -190,6 +202,7 @@ while True:
         found_object = False
         object_firsttime = True
         count_center = 0
+        centered_found_F = False
 
 cap.release()
 cv2.destroyAllWindows()
