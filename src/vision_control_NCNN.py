@@ -42,26 +42,6 @@ key_to_class = {
 target_class = None          # class name that user selected
 trigger_predict = False      # run predict only when user presses a key
 
-Set_robot_middle = 0
-
-# ====== TUNING ======
-TOL = 20          #  (px)
-ALPHA = 0.2       # exponential smoothing (0.15-0.30)
-JUMP_TH = 80      # outlier threshold (60-150)
-MAX_STEP = 20     # rate limit per frame (10-30)
-
-
-# ====== STATE (???????? global/??? loop) ======
-dx_f = 0.0
-dy_f = 0.0
-dx_cmd = 0.0
-dy_cmd = 0.0
-filter_inited = False
-center_count = 0
-dx_prev = 0
-dy_prev = 0
-dxdy_inited = False
-
 def find_robot_middle(frame_camera,x1_oj, y1_oj, x2_oj, y2_oj):
     height, width = frame_camera.shape[:2]
     center_x = width // 2
@@ -75,7 +55,6 @@ def find_robot_middle(frame_camera,x1_oj, y1_oj, x2_oj, y2_oj):
 
 # RATE_R = 640.0   # px/s (หมุนขวา) จาก log ของคุณ ~638.6
 # RATE_L = 540.0   # px/s (หมุนซ้าย) จาก log ของคุณ ~537.5
-
 RATE_R = 900.0   # px/s (หมุนขวา) จาก log ของคุณ ~638.6
 RATE_L = 900.0
 
@@ -91,6 +70,9 @@ found_object = False
 object_firsttime = True
 centered_found_F = False
 count_center = 0
+
+middle_complete = False
+destination_reached = False
 
 while True:
     check_cap_sucess, frame = cap.read()
@@ -123,28 +105,22 @@ while True:
                         x1, y1, x2, y2 = boxes.xyxy[i].cpu().numpy()
                         conf = float(boxes.conf[i].item()) if boxes.conf is not None else 0.0
                         matched.append((conf, (x1, y1, x2, y2)))
-                        #find a distance
-                        width_Camera_object = y2 - y1
-                        distance = (Width_real[name] * Focus_real) / width_Camera_object
-                        #move robot to center objectSSSt
-                       
+                        #move robot to center object                       
                         dx, dy = find_robot_middle(frame, x1, y1, x2, y2)
 
                         centered = (abs(dx) <= TOL)
                         ##################################
                         if abs(dx) <= TOL:
                             spi.send(b"s")
-                        else:
-                        
+                            middle_complete = True
+                        else:                       
                             dx1 = dx
-
                             if dx > 0:
                                 direction = b"r"
                                 rate = RATE_R
                             else:
                                 direction = b"l"
                                 rate = RATE_L
-
                             # 3) cal movement dx/rate ( clamp)
                             dt = abs(dx) / rate
                             dt = max(MIN_DT, min(dt, MAX_DT))
@@ -154,6 +130,16 @@ while True:
                             time.sleep(float(dt))
                             spi.send(b"s")
 
+                        if middle_complete == True:
+                             #find a distance
+                            width_Camera_object = y2 - y1
+                            distance = (Width_real[name] * Focus_real) / width_Camera_object
+
+                            if distance > 10.0 and destination_reached == False:
+                                spi.send(b"f")
+                            else:
+                                spi.send(b"s")
+                                destination_reached = True
 
                         ##################################
                         cv2.putText(frame, f"error dx,dy = ({dx},{dy})", (10, 70),
