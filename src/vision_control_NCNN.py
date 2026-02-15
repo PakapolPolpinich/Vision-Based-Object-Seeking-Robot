@@ -87,7 +87,7 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
         if trigger_predict == True and target_class is not None:
-            results = model_object.predict(frame,imgsz = 512 ,conf=0.7, verbose=False) #return list of results
+            results = model_object.predict(frame,imgsz = 512 ,conf=0.6, verbose=False) #return list of results
             # get boxes classes
             boxes = results[0].boxes
             matched = []
@@ -110,32 +110,36 @@ while True:
 
                         centered = (abs(dx) <= TOL)
                         ##################################
-                        if abs(dx) <= TOL:
-                            spi.send(b"s")
-                            middle_complete = True
-                        else:                       
-                            dx1 = dx
-                            if dx > 0:
-                                direction = b"r"
-                                rate = RATE_R
+                        if middle_complete == False:
+                            if abs(dx) <= TOL:
+                                spi.send(b"s")
+                                count_center += 1
+                                if count_center > 30:
+                                    middle_complete = True
                             else:
-                                direction = b"l"
-                                rate = RATE_L
-                            # 3) cal movement dx/rate ( clamp)
-                            dt = abs(dx) / rate
-                            dt = max(MIN_DT, min(dt, MAX_DT))
+                                count_center = 0                       
+                                dx1 = dx
+                                if dx > 0:
+                                    direction = b"r"
+                                    rate = RATE_R
+                                else:
+                                    direction = b"l"
+                                    rate = RATE_L
+                                # 3) cal movement dx/rate ( clamp)
+                                dt = abs(dx) / rate
+                                dt = max(MIN_DT, min(dt, MAX_DT))
 
-                            # 4) send → delay → stop
-                            spi.send(direction)
-                            time.sleep(float(dt))
-                            spi.send(b"s")
+                                # 4) send → delay → stop
+                                spi.send(direction)
+                                time.sleep(float(dt))
+                                spi.send(b"s")
 
                         if middle_complete == True:
                              #find a distance
                             width_Camera_object = y2 - y1
                             distance = (Width_real[name] * Focus_real) / width_Camera_object
 
-                            if distance > 10.0 and destination_reached == False:
+                            if distance > 20.0 and destination_reached == False:
                                 spi.send(b"f")
                             else:
                                 spi.send(b"s")
@@ -162,8 +166,9 @@ while True:
                 x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
                                
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
-                cv2.putText(frame, f"d: {distance:.2f} cm", (x1, y2 + 40),
+            
+                if middle_complete == True:
+                    cv2.putText(frame, f"d: {distance:.2f} cm", (x1, y2 + 40),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
                 cv2.putText(frame, f"{target_class} {best_conf:.2f}",
@@ -189,6 +194,8 @@ while True:
         object_firsttime = True
         count_center = 0
         centered_found_F = False
+        middle_complete = False
+        destination_reached = False
 
 cap.release()
 cv2.destroyAllWindows()
