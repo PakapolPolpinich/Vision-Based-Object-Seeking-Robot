@@ -20,14 +20,12 @@ model_object = YOLO(model_path)
 
 cap = cv2.VideoCapture(0)
 
-
-
 while True:
     check_cap_sucess, frame = cap.read()
     #check status camera
     if check_cap_sucess == True:
         
-        results = model_object.predict(frame, conf=0.4, verbose=False) #return list of results
+        results = model_object.predict(frame, conf=0.7, verbose=False) #return list of results
 
         # get boxes classes
         boxes = results[0].boxes
@@ -50,27 +48,14 @@ while True:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 text = f"{class_name} x1:{x1} y1:{y1} x2:{x2} y2:{y2}"
                 #text_y = y1 - 10 if y1 - 10 > 10 else y1 + 20
+                # w = y2 - y1
+                # W = 5.8
+                # # d = 20.5
+                # # f = (w * d) / W
 
-                w = y2 - y1
-                W = 5.8
-                # d = 20.5
-                # f = (w * d) / W
-
-                f = 512.5  #focal length
-                d = (W * f) / w
-                # cv2.putText(
-                #     annotated, f"f: {f:.2f} pixel", (x1, y2 + 20), 
-                #     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
-                # )
-                cv2.putText(
-                    annotated, f"d: {d:.2f} cm", (x1, y2 + 40),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
-                )
-                # cv2.putText(
-                #     annotated, text, (x1, y2),
-                #     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
-                # )
-
+                # f = 512.5  #focal length
+                # d = (W * f) / w
+              
                 cv2.circle(annotated, (x1, y1), 4, (0, 0, 255), -1)   # top-left
                 cv2.circle(annotated, (x2, y2), 4, (255, 0, 0), -1)   # bottom-right
       
