@@ -1,3 +1,4 @@
+#Test about vision control with NCNN
 from ultralytics import YOLO
 import cv2
 import os
