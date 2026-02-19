@@ -9,3 +9,5 @@ train/vision/README.dataset.txt
 train/vision/README.roboflow.txt
 
 data/
+
+STM32G4_Car/
