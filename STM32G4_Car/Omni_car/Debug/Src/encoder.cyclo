@@ -1,0 +1,5 @@
+C:/Users/Admin/Documents/python_ai/Final_project/Vision-Based-Object-Seeking-Robot/STM32G4_Car/LibCMSIS/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	2
+../Src/encoder.c:5:7:Encoder_init	1
+../Src/encoder.c:60:9:GetValueEncoder	5
+../Src/encoder.c:70:6:TIM3_IRQHandler	3
+../Src/encoder.c:80:6:TIM4_IRQHandler	3

@@ -1,0 +1,13 @@
+C:/Users/Admin/Documents/python_ai/Final_project/Vision-Based-Object-Seeking-Robot/STM32G4_Car/LibCMSIS/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	2
+C:/Users/Admin/Documents/python_ai/Final_project/Vision-Based-Object-Seeking-Robot/STM32G4_Car/LibCMSIS/CMSIS/Include/core_cm4.h:1809:22:__NVIC_SetPriority	2
+../Src/motor.c:28:6:motor_init	1
+../Src/motor.c:46:6:rotateMotor	3
+../Src/motor.c:61:6:Omni_forward	1
+../Src/motor.c:67:6:Omni_backward	1
+../Src/motor.c:73:6:Omni_left	1
+../Src/motor.c:79:6:Omni_right	1
+../Src/motor.c:85:6:Omni_stop	1
+../Src/motor.c:92:6:Omni_clockwise	1
+../Src/motor.c:98:6:Omnicontrol	7
+../Src/motor.c:116:6:Timer7_init	1
+../Src/motor.c:134:6:Timer6_init	1

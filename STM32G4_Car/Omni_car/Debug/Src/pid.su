@@ -1,0 +1,3 @@
+../Src/pid.c:33:7:ChangetoRPM	24	static
+../Src/pid.c:39:6:VelocityEn	24	static
+../Src/pid.c:50:9:pid_control	40	static

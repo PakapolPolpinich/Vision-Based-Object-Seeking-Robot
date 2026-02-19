@@ -1,0 +1,13 @@
+C:/Users/Admin/Documents/python_ai/Final_project/Vision-Based-Object-Seeking-Robot/STM32G4_Car/LibCMSIS/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static,ignoring_inline_asm
+C:/Users/Admin/Documents/python_ai/Final_project/Vision-Based-Object-Seeking-Robot/STM32G4_Car/LibCMSIS/CMSIS/Include/core_cm4.h:1809:22:__NVIC_SetPriority	16	static
+../Src/motor.c:28:6:motor_init	8	static
+../Src/motor.c:46:6:rotateMotor	16	static
+../Src/motor.c:61:6:Omni_forward	4	static
+../Src/motor.c:67:6:Omni_backward	4	static
+../Src/motor.c:73:6:Omni_left	4	static
+../Src/motor.c:79:6:Omni_right	4	static
+../Src/motor.c:85:6:Omni_stop	4	static
+../Src/motor.c:92:6:Omni_clockwise	4	static
+../Src/motor.c:98:6:Omnicontrol	16	static
+../Src/motor.c:116:6:Timer7_init	8	static
+../Src/motor.c:134:6:Timer6_init	8	static

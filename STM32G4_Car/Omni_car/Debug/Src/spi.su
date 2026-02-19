@@ -1,0 +1,3 @@
+C:/Users/Admin/Documents/python_ai/Final_project/Vision-Based-Object-Seeking-Robot/STM32G4_Car/LibCMSIS/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static,ignoring_inline_asm
+C:/Users/Admin/Documents/python_ai/Final_project/Vision-Based-Object-Seeking-Robot/STM32G4_Car/LibCMSIS/CMSIS/Include/core_cm4.h:1809:22:__NVIC_SetPriority	16	static
+../Src/spi.c:10:6:Spi_init	16	static
