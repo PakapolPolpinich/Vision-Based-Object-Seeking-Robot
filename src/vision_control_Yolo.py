@@ -1,3 +1,4 @@
+# Test about vision control with YoloV8n
 from ultralytics import YOLO
 import cv2
 import os
