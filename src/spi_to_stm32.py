@@ -3,7 +3,7 @@ import spidev
 
 class SPIProtocol:
 
-    def __init__(self, bus=0, device=1, speed=50000000):
+    def __init__(self, bus=0, device=1, speed=40000000):
         self.spi = spidev.SpiDev()
         self.spi.open(bus, device)
         self.spi.mode = 0b00 #mode 0
