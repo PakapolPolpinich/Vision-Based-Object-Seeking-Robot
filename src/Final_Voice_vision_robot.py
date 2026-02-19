@@ -5,9 +5,6 @@ from spi_to_stm32 import SPIProtocol
 from voiceSTT import VoiceSTT
 import time
 
-# ===== STT thread control (NEW) =====
-import threading
-import queue
 
 STATE = "Audio_detect"
 
@@ -124,9 +121,7 @@ while True:
                 print("No valid target in speech.")
 
     elif STATE == "Vision_detect":
-        # ===== pause STT in Vision_detect so NCNN can use CPU =====
-
-        # (No STT work here -> vision can use CPU)
+        
         cv2.putText(frame, "STATE: Vision", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
@@ -171,11 +166,11 @@ while True:
                                 else:
                                     direction = b"l"
                                     rate = RATE_L
-                                # 3) cal movement dx/rate ( clamp)
+                                #  cal movement dx/rate ( clamp)
                                 dt = abs(dx) / rate
                                 dt = max(MIN_DT, min(dt, MAX_DT))
 
-                                # 4) send → delay → stop
+                                # send → delay → stop
                                 spi.send(direction)
                                 time.sleep(float(dt))
                                 spi.send(b"s")
@@ -200,7 +195,7 @@ while True:
         if found_object == False:  # check first time
             spi.send(b"c")  # clockwise
 
-        # draw best match (highest confidence)
+        # draw best match 
         if len(matched) > 0:
             matched.sort(key=lambda x: x[0], reverse=True)
             best_conf, (x1, y1, x2, y2) = matched[0]
@@ -232,7 +227,6 @@ while True:
 
         STATE = "Audio_detect"
         print("go to this")
-        # (Audio thread will resume automatically in Audio_detect)
 
     cv2.imshow("camera", frame)
 

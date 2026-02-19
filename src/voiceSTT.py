@@ -28,7 +28,7 @@ class VoiceSTT:
         try:
             frames = int(self.fs * self.duration)
 
-            print(f"🎤 Listening for {self.duration} seconds...")
+            print(f"Listening for {self.duration} seconds...")
             audio_raw = sd.rec(frames,
                                samplerate=self.fs,
                                channels=1,
@@ -43,7 +43,7 @@ class VoiceSTT:
                                  sample_rate=self.fs,
                                  sample_width=2)
 
-            print("⏳ Recognizing...")
+            print("Recognizing...")
             text = self.recognizer.recognize_google(
                 audio,
                 language=self.lang
@@ -52,15 +52,15 @@ class VoiceSTT:
             return text
 
         except sr.UnknownValueError:
-            print("❌ Could not understand the audio")
+            print("Could not understand the audio")
             return None
 
         except sr.RequestError as e:
-            print("⚠️ Google STT error:", e)
+            print("Google STT error:", e)
             return None
 
         except Exception as e:
-            print("🚫 Error:", e)
+            print("Error:", e)
             return None
 
 
